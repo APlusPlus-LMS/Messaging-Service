@@ -62,7 +62,7 @@ router.route("/room/:channelId")
                     endVal = channel.messages.length;
                 }
 
-                return res.status(200).send(channel.messages.slice(startVal, endVal));
+                return res.status(200).send(channel.messages.reverse().slice(startVal, endVal));
             })
             .catch(err => {
                 console.error(err);
