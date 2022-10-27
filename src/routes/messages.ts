@@ -1,10 +1,43 @@
-import { Router } from "express";
+import express, { Router } from "express";
 import { ChannelModel, IMessage } from "../database/schema.js";
 
 const router = Router();
+router.use(express.json());
+// NOTE: The order here is important!
+// Due to there being a post request with an arg, which conflicts with this
+router.route("/room/new")
+    .post((req, res) => {
+        // req is expected to have a body in the form:
+        /*
+         * {
+            "users": [userId]
+         }
+         */
+
+        // TODO: Fetch users here
+        if (req.body.users === undefined) {
+            return res.status(400).send("Missing users to create a channel for.");
+        }
+
+        const channel = new ChannelModel({
+            name: "TEMP CHANNEL NAME",
+            messages: [],
+            members: req.body.users
+
+        });
+
+        channel.save()
+            .then(chan => {
+                res.status(201).send(chan);
+            })
+            .catch(err => {
+                console.error(err);
+                res.status(500).send(err);
+            });
+    });
 
 // TODO: Auth (fetch token from headers, extract user id from it, check if user id is present in channel.members)
-router.route("/messages/:channelId")
+router.route("/room/:channelId")
     .get((req, res) => {
         ChannelModel.findById(req.params.channelId)
             .then(channel => {
@@ -49,7 +82,7 @@ router.route("/messages/:channelId")
                 if (req.body.content === undefined) {
                     return res.status(400).send("Missing message body.");
                 }
-                else if (req.body.authorId === undefined) {
+                else if (req.body.authorId === undefined || !channel.members.includes(req.body.authorId)) {
                     return res.status(401).send("You are not authorized to send messages to this channel.");
                 }
 

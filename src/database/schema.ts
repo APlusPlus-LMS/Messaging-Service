@@ -1,5 +1,5 @@
-import mongoose, { model, Schema } from "mongoose";
-import paginate  from "mongoose-paginate-v2";
+import { model, Schema } from "mongoose";
+import paginate from "mongoose-paginate-v2";
 
 export interface IMessage {
     authorId: string,
@@ -9,7 +9,7 @@ export interface IMessage {
     isEdited: boolean
 }
 
-export interface IChannel extends mongoose.Document {
+export interface IChannel {
     name: string,
     messages: IMessage[],
     members: string[] // user ids of members in this channel
@@ -33,4 +33,4 @@ const channelSchema = new Schema<IChannel>({
 channelSchema.plugin(paginate);
 export { channelSchema };
 
-export const ChannelModel = model("Channel", channelSchema);
+export const ChannelModel = model<IChannel>("Channel", channelSchema);
